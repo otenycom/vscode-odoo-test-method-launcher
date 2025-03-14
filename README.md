@@ -14,23 +14,21 @@ Odoo Test Method Launcher is a Visual Studio Code / Cursor extension developed b
 
 1. Open a Python file containing Odoo test methods
 2. Place your cursor within a test method (or on the method definition line)
-3. Press `Ctrl+Alt+T` (or `Cmd+Alt+T` on macOS)
+3. Press `F5` to debug the test method or `Ctrl+F5` (or `Cmd+F5` on macOS) to run without debugging
 4. The extension will:
    - Identify the current test method
    - Update `.vscode/settings.json` with the test method name (as `.test_method_name`)
    - Ensure a test configuration exists in `.vscode/launch.json`
-   - Start the debugger using this configuration
+   - Start the debugger or runner using this configuration
 
-## Requirements
+If your cursor is not on a test method (methods starting with "test_"), the extension will fall back to the standard debugging behavior in VSCode.
 
-- Visual Studio Code 1.60.0 or higher. Also works in Cursor.
-- An Odoo project with a properly configured workspace
+## Extension Commands
 
-## Extension Settings
+This extension contributes the following commands:
 
-This extension contributes the following command:
-
-* `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method
+* `oteny-run-odoo-test.debugCurrentTest`: Debug Current Odoo Test Method (F5)
+* `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method without Debugging (Ctrl+F5 or Cmd+F5 on macOS)
 
 ## How It Works
 

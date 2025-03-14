@@ -6,45 +6,61 @@ import * as jsonc from 'jsonc-parser';
 export function activate(context: vscode.ExtensionContext) {
   console.log('OdooRunTest extension is now active!');
 
-  let disposable = vscode.commands.registerCommand('oteny-run-odoo-test.runCurrentTest', async () => {
-    try {
-      // Get current editor and document
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        vscode.window.showErrorMessage('No active editor');
-        return;
-      }
-
-      const document = editor.document;
-      if (document.languageId !== 'python') {
-        vscode.window.showErrorMessage('Not a Python file');
-        return;
-      }
-
-      // Get the current method name
-      const methodName = getCurrentMethodName(document, editor.selection.active);
-      if (!methodName) {
-        vscode.window.showErrorMessage('No method found at cursor position');
-        return;
-      }
-
-      vscode.window.showInformationMessage(`Running test method: ${methodName}`);
-
-      // Update settings.json
-      await updateSettingsJson(methodName);
-
-      // Update launch.json
-      await ensureTestConfigInLaunchJson();
-
-      // Start debugging with the test configuration
-      await startDebugging();
-
-    } catch (error) {
-      vscode.window.showErrorMessage(`Error: ${error instanceof Error ? error.message : String(error)}`);
-    }
+  // Command to run the current test without debugging
+  let runDisposable = vscode.commands.registerCommand('oteny-run-odoo-test.runCurrentTest', async () => {
+    await executeTestCommand(false);
   });
 
-  context.subscriptions.push(disposable);
+  // Command to debug the current test
+  let debugDisposable = vscode.commands.registerCommand('oteny-run-odoo-test.debugCurrentTest', async () => {
+    await executeTestCommand(true);
+  });
+
+  context.subscriptions.push(runDisposable, debugDisposable);
+}
+
+/**
+ * Execute the appropriate test command based on context
+ */
+async function executeTestCommand(useDebugger: boolean): Promise<void> {
+  try {
+    // Get current editor and document
+    const editor = vscode.window.activeTextEditor;
+    if (!editor) {
+      vscode.window.showInformationMessage('No active editor, running default configuration');
+      await runDefaultConfiguration(useDebugger);
+      return;
+    }
+
+    const document = editor.document;
+    if (document.languageId !== 'python') {
+      vscode.window.showInformationMessage('Not a Python file, running default configuration');
+      await runDefaultConfiguration(useDebugger);
+      return;
+    }
+
+    // Get the current method name
+    const methodName = getCurrentMethodName(document, editor.selection.active);
+    if (!methodName || !methodName.startsWith('test_')) {
+      vscode.window.showInformationMessage('No test method found at cursor position, running default configuration');
+      await runDefaultConfiguration(useDebugger);
+      return;
+    }
+
+    vscode.window.showInformationMessage(`${useDebugger ? 'Debugging' : 'Running'} test method: ${methodName}`);
+
+    // Update settings.json
+    await updateSettingsJson(methodName);
+
+    // Update launch.json
+    await ensureTestConfigInLaunchJson();
+
+    // Start with or without debugging using the test configuration
+    await startTest(useDebugger);
+
+  } catch (error) {
+    vscode.window.showErrorMessage(`Error: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
@@ -65,6 +81,26 @@ function getCurrentMethodName(document: vscode.TextDocument, position: vscode.Po
   }
   
   return null;
+}
+
+/**
+ * Run the default configuration
+ */
+async function runDefaultConfiguration(useDebugger: boolean): Promise<void> {
+  try {
+    if (useDebugger) {
+      // Use the default F5 behavior
+      await vscode.commands.executeCommand('workbench.action.debug.start');
+    } else {
+      // Use the default Ctrl+F5 behavior
+      await vscode.commands.executeCommand('workbench.action.debug.run');
+    }
+  } catch (error) {
+    vscode.window.showErrorMessage(
+      `Failed to start ${useDebugger ? 'debugging' : 'running'}. ` +
+      `Ensure you have a valid launch configuration.`
+    );
+  }
 }
 
 /**
@@ -191,9 +227,9 @@ async function ensureTestConfigInLaunchJson(): Promise<void> {
 }
 
 /**
- * Start the debugging session using the test configuration
+ * Start the test session with or without debugging
  */
-async function startDebugging(): Promise<void> {
+async function startTest(useDebugger: boolean): Promise<void> {
   const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
   if (!workspaceFolder) {
     throw new Error('No workspace folder opened');
@@ -202,7 +238,8 @@ async function startDebugging(): Promise<void> {
   // Get all launch configurations
   const launchPath = path.join(workspaceFolder.uri.fsPath, '.vscode', 'launch.json');
   if (!fs.existsSync(launchPath)) {
-    throw new Error('No launch.json found');
+    vscode.window.showErrorMessage('No launch.json found. Please create a debug configuration first.');
+    return;
   }
   
   const launchConfig = jsonc.parse(fs.readFileSync(launchPath, 'utf-8'));
@@ -216,9 +253,14 @@ async function startDebugging(): Promise<void> {
     throw new Error('No test configuration found in launch.json');
   }
   
-  // Start debugging with the test configuration
-  console.log('Starting debugging with test configuration:', testConfig.name);
-  vscode.debug.startDebugging(workspaceFolder, testConfig.name);
+  // Start with or without debugging based on parameter
+  console.log(`Starting ${useDebugger ? 'debugging' : 'running'} with test configuration: ${testConfig.name}`);
+  
+  if (useDebugger) {
+    await vscode.debug.startDebugging(workspaceFolder, testConfig.name);
+  } else {
+    await vscode.debug.startDebugging(workspaceFolder, testConfig.name, { noDebug: true });
+  }
 }
 
 export function deactivate() {} 
