@@ -1,0 +1,74 @@
+i have a blank new workfolder called runtest. I want to create a visual studio code extension called OdooRunTest. The extension's functionalty should be as follows. It should implement a vscode command that can be bound to a keystroke. The name of the command is "Odoo Runtest: Run Current Test". The run_current_odoo_test command will do the following. It will assume the current editor is open in a python file in a Odoo project. Based on the caret position in the current editor, it will lookup the name of the current method. It will use this name to patch the .vscode/settings.json file in the current workspace. An example format of this file is as follows  
+{
+    "odoo": {
+        "database": "rm15",
+        "user": "ries",
+        "password": "ries",
+        "addonsPath": "~/odoo/odoo18/addons,~/odoo/enterprise18,~/oteny/rivermen",
+        //"importFolder": "~/Library/CloudStorage/OneDrive-CuneusEU/Documents - About/Ries Vriend/Odoo Import/NAS/",
+        "importFolder": "~/My Drive/Vriend Studio/Customers/Cuneus/Import",
+        "installModules": "riverflow,rivercreds,rivermen",
+        // "test-tags": "test_airfare_contribution",
+        "testTags": ".test_billing_can_send_invoice_for_partial_month_is_not_supported",
+    }
+}
+the patch should place the method's name in attribute testTags, and prefix the name with a dot. The dot indicates that it's a test method name, and not a tag. 
+The testTags setting is used in the .vscode/launch.json configuration file, which is assumed to have a configuration with a name that ends in '-test'. If this configuration does not exist our extension should create it by cloning the first configuration and adapting it. An example launch config is as follows. 
+{
+    // xx
+    "version": "0.2.1",
+    "configurations": [
+        {
+            "name": "rivermen",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "python": "${workspaceRoot}/../../odoo/venv/bin/python3",
+            "program": "${workspaceRoot}/../../odoo/odoo18/odoo-bin",
+            "args": [
+                "--addons-path=${config:odoo.addonsPath}",
+                "--without-demo=True",
+                "-d",
+                "${config:odoo.database}",
+                "-r",
+                "${config:odoo.user}",
+                "-w",
+                "${config:odoo.password}",
+                "--max-cron-threads",
+                "0"
+            ]
+        },
+        {
+            "name": "rivermen-test",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "python": "${workspaceRoot}/../../odoo/venv/bin/python3",
+            "program": "${workspaceRoot}/../../odoo/odoo18/odoo-bin",
+            "args": [
+                "--addons-path=${config:odoo.addonsPath}",
+                "--test-enable",
+                "--test-tags=${config:odoo.testTags}",
+                "-d",
+                "${config:odoo.database}",
+                "-r",
+                "${config:odoo.user}",
+                "-w",
+                "${config:odoo.password}",
+                "--max-cron-threads",
+                "0",
+                "--limit-time-real",
+                "0",
+            ]
+        },
+        
+    ]
+}
+
+as can be seen in the launch config "rivermen-test", it lauches odoo with the --test-enable and --test-tags options. The ${config:odoo.testTags} is replaced by the value of the testTags setting in the .vscode/settings.json file.
+
+Our extension should after patching the .vscode/settings.json file, patch the .vscode/launch.json file. It should add a new configuration with the name "project-test" and the other settings copied from the first configuration.
+
+The run_current_odoo_test command will then activate the "-test" configuration in vscode for debugging. It will then start the debugger using this launch configuration. The result will be that the test method will be executed.
+
+Implement all files and functionality for this extension.
