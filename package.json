@@ -2,7 +2,7 @@
   "name": "oteny-vscode-odoo-test-method-launcher",
   "displayName": "Odoo Test Method Launcher by Oteny.com",
   "description": "Run the current Odoo test method quickly from VSCode",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "publisher": "oteny",
   "engines": {
     "vscode": "^1.60.0"
@@ -38,6 +38,7 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
+    "package": "vsce package",
     "test": "node ./out/test/runTest.js"
   },
   "dependencies": {
@@ -58,8 +59,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/oteny/vscode-odoo-test-method-launcher.git"
+    "url": "https://github.com/otenycom/vscode-odoo-test-method-launcher.git"
   },
+  "icon": "images/oteny-logo.png",
   "license": "MIT",
   "keywords": ["odoo", "testing", "debugging"]
 }
