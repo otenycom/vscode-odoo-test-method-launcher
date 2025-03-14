@@ -6,7 +6,7 @@ import * as jsonc from 'jsonc-parser';
 export function activate(context: vscode.ExtensionContext) {
   console.log('OdooRunTest extension is now active!');
 
-  let disposable = vscode.commands.registerCommand('odoo-runtest.runCurrentTest', async () => {
+  let disposable = vscode.commands.registerCommand('oteny-run-odoo-test.runCurrentTest', async () => {
     try {
       // Get current editor and document
       const editor = vscode.window.activeTextEditor;

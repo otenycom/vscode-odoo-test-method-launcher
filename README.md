@@ -1,39 +1,38 @@
-# OdooRunTest
+# Odoo Test Method Launcher
 
-OdooRunTest is a Visual Studio Code extension designed to make running Odoo tests easier. It allows you to quickly run a specific test method directly from your code editor with a simple keyboard shortcut.
+A Visual Studio Code extension that allows you to launch Odoo test methods directly from the editor.
 
 ## Features
 
-- Identify the current test method based on your cursor position in Python files
-- Automatically update `.vscode/settings.json` with the correct test method name
-- Ensure a test debug configuration exists in `.vscode/launch.json`
-- Start the debugger with the appropriate test configuration
-
-## Usage
-
-1. Open a Python file containing Odoo test methods
-2. Place your cursor within (or on the line of) the test method you want to run
-3. Press `Ctrl+Alt+T` (or `Cmd+Alt+T` on macOS) 
-4. The extension will:
-   - Update `.vscode/settings.json` with the current test method
-   - Ensure a test configuration exists in `.vscode/launch.json`
-   - Start the debugger using this configuration
+- Right-click on a test method in a Python file to launch it directly in Odoo
+- Configure Odoo path and configuration file through settings
+- Supports running individual test methods or entire test classes
 
 ## Requirements
 
-- Visual Studio Code 1.60.0 or higher
-- An Odoo project with a properly configured `.vscode/settings.json` file
+- Visual Studio Code 1.85.0 or higher
+- Odoo installed on your system
 
 ## Extension Settings
 
-This extension contributes the following command:
+This extension contributes the following settings:
 
-* `odoo-runtest.runCurrentTest`: Run the current Odoo test method
+* `odooTestMethodLauncher.odooPath`: Path to the Odoo executable
+* `odooTestMethodLauncher.configPath`: Path to the Odoo configuration file
 
-## How It Works
+## How to Use
 
-The extension updates the `odoo.testTags` property in your `.vscode/settings.json` file with the current method name prefixed with a dot (e.g., `.test_method_name`). It then ensures there's a debug configuration that uses this setting to run the test.
+1. Open a Python test file (filename starting with `test_`)
+2. Right-click on a test method or class
+3. Select "Launch Odoo Test Method" from the context menu
+4. The test will run in the integrated terminal
 
-## License
+## Known Issues
 
-[MIT](LICENSE) 
+Please report any issues on the GitHub repository.
+
+## Release Notes
+
+### 0.0.1
+
+Initial release of Odoo Test Method Launcher 
