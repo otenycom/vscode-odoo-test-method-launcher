@@ -1,9 +1,8 @@
 # Change Log
 
-All notable changes to the "Odoo Test Method Launcher" extension will be documented in this file.
+List of notable changes to the "Odoo Test Method Launcher" VSCode extension
 
-## [0.0.1] - 2023-12-01
+## [1.0.2] - 2023-12-01
 
 - Initial release
-- Added ability to launch Odoo test methods from the editor context menu
-- Added configuration options for Odoo path and config file 
+- Added ability to launch a single Odoo test method by placing the caret in the method body and giving the 'Oteny: Run Current Odoo Test' command in the Command Pallete, or by pressing "option+command+T".

@@ -1,38 +1,132 @@
-# Odoo Test Method Launcher
+# Odoo Test Method Launcher by Oteny.com
 
-A Visual Studio Code extension that allows you to launch Odoo test methods directly from the editor.
+Odoo Test Method Launcher is a Visual Studio Code / Cursor extension developed by Oteny.com, designed to make running Odoo tests easier. It allows you to quickly run a specific test method directly from your code editor with a simple keyboard shortcut.
 
 ## Features
 
-- Right-click on a test method in a Python file to launch it directly in Odoo
-- Configure Odoo path and configuration file through settings
-- Supports running individual test methods or entire test classes
+- Automatically detects the current test method based on your cursor position in Python files
+- Launches the debugger with the appropriate test configuration
+- Updates `.vscode/settings.json` with the correct test method name in the `odoo.testTags` property
+- Creates or updates a test configuration in `.vscode/launch.json` if needed
+- Works with standard Odoo test classes (like `TransactionCase`)
+
+## Usage
+
+1. Open a Python file containing Odoo test methods
+2. Place your cursor within a test method (or on the method definition line)
+3. Press `Ctrl+Alt+T` (or `Cmd+Alt+T` on macOS)
+4. The extension will:
+   - Identify the current test method
+   - Update `.vscode/settings.json` with the test method name (as `.test_method_name`)
+   - Ensure a test configuration exists in `.vscode/launch.json`
+   - Start the debugger using this configuration
 
 ## Requirements
 
-- Visual Studio Code 1.85.0 or higher
-- Odoo installed on your system
+- Visual Studio Code 1.60.0 or higher. Also works in Cursor.
+- An Odoo project with a properly configured workspace
 
 ## Extension Settings
 
-This extension contributes the following settings:
+This extension contributes the following command:
 
-* `odooTestMethodLauncher.odooPath`: Path to the Odoo executable
-* `odooTestMethodLauncher.configPath`: Path to the Odoo configuration file
+* `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method
 
-## How to Use
+## How It Works
 
-1. Open a Python test file (filename starting with `test_`)
-2. Right-click on a test method or class
-3. Select "Launch Odoo Test Method" from the context menu
-4. The test will run in the integrated terminal
+The extension:
+1. Identifies the current method by searching backward from the cursor position for a method definition
+2. Updates the `odoo.testTags` property in your `.vscode/settings.json` file with the current method name prefixed with a dot (e.g., `.test_method_name`)
+3. Ensures there's a debug configuration in `.vscode/launch.json` that:
+   - Is based on your existing launch configuration
+   - Has `-test` appended to the name
+   - Includes the necessary test arguments (`--test-enable`, `--test-tags=${config:odoo.testTags}`, `--limit-time-real 0`)
+4. Launches the debugger with this test configuration
 
-## Known Issues
+## Example Configuration Files
 
-Please report any issues on the GitHub repository.
+### Example `launch.json`
 
-## Release Notes
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "odoo",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "python": "${workspaceRoot}/path/to/venv/bin/python3",
+            "program": "${workspaceRoot}/path/to/odoo/odoo-bin",
+            "args": [
+                "--addons-path=${config:odoo.addonsPath}",
+                "-d",
+                "${config:odoo.database}",
+                "-r",
+                "${config:odoo.user}",
+                "-w",
+                "${config:odoo.password}"
+            ]
+        },
+        {
+            "name": "odoo-test",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "python": "${workspaceRoot}/path/to/venv/bin/python3",
+            "program": "${workspaceRoot}/path/to/odoo/odoo-bin",
+            "args": [
+                "--addons-path=${config:odoo.addonsPath}",
+                "--test-enable",
+                "--test-tags=${config:odoo.testTags}",
+                "-d",
+                "${config:odoo.database}",
+                "-r",
+                "${config:odoo.user}",
+                "-w",
+                "${config:odoo.password}",
+                "--limit-time-real",
+                "0"
+            ]
+        }
+    ]
+}
+```
 
-### 0.0.1
+### Example `settings.json`
 
-Initial release of Odoo Test Method Launcher 
+```json
+{
+    "odoo": {
+        "database": "odoo_db",
+        "user": "odoo",
+        "password": "password",
+        "addonsPath": "/path/to/addons,/path/to/custom/addons",
+        "testTags": ".test_method_name"
+    }
+}
+```
+
+The extension will automatically update the `odoo.testTags` value in your settings.json when you run a test, and will create the test configuration in launch.json if it doesn't already exist.
+
+## Why Use `settings.json` for Test Configuration?
+
+Using `settings.json` for test-specific configuration offers several advantages:
+
+- **Developer-specific settings**: The `.vscode/settings.json` file is typically added to `.gitignore`, making it local to each developer's environment. This means each developer can have their own test configuration without affecting others.
+
+- **Avoiding merge conflicts**: Since `settings.json` isn't typically committed to version control, you won't encounter merge conflicts when multiple developers are working on different tests simultaneously.
+
+- **Separation of concerns**: By keeping the test method selection in `settings.json` and referencing it from `launch.json`, we maintain a clean separation between the debugger configuration (shared across the team) and the specific test being run (individual to each developer).
+
+- **Quick switching**: This approach allows you to quickly switch between different test methods without modifying shared configuration files, making your workflow more efficient.
+
+The extension handles all the necessary updates to `settings.json` automatically, so you can focus on writing and testing your code.
+
+## About Oteny.com
+
+Oteny.com specializes in Odoo development tools and services. This extension is part of our commitment to improving the Odoo development experience for the community.
+
+## License
+
+[MIT](LICENSE) 
