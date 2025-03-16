@@ -27,12 +27,13 @@ If your cursor is not on a test method (methods starting with "test_"), the exte
 
 This extension contributes the following commands:
 
-* `oteny-run-odoo-test.debugCurrentTest`: Debug Current Odoo Test Method (F5)
-* `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method without Debugging (Ctrl+F5 or Cmd+F5 on macOS)
+- `oteny-run-odoo-test.debugCurrentTest`: Debug Current Odoo Test Method (F5)
+- `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method without Debugging (Ctrl+F5 or Cmd+F5 on macOS)
 
 ## How It Works
 
 The extension:
+
 1. Identifies the current method by searching backward from the cursor position for a method definition
 2. Updates the `odoo.testTags` property in your `.vscode/settings.json` file with the current method name prefixed with a dot (e.g., `.test_method_name`)
 3. Ensures there's a debug configuration in `.vscode/launch.json` that:
@@ -127,4 +128,4 @@ Oteny.com specializes in Odoo development tools and services. This extension is 
 
 ## License
 
-[MIT](LICENSE) 
+[MIT](LICENSE)

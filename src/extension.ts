@@ -120,12 +120,13 @@ async function updateSettingsJson(methodName: string): Promise<void> {
     fs.mkdirSync(vscodeDir, { recursive: true });
   }
   
+  let fileContent = '';
   let settingsJson: any = {};
   
   // Read existing settings.json if it exists
   if (fs.existsSync(settingsPath)) {
     try {
-      const fileContent = fs.readFileSync(settingsPath, 'utf-8');
+      fileContent = fs.readFileSync(settingsPath, 'utf-8');
       settingsJson = jsonc.parse(fileContent);
     } catch (error) {
       console.error('Error reading settings.json:', error);
@@ -133,18 +134,40 @@ async function updateSettingsJson(methodName: string): Promise<void> {
     }
   }
   
-  // Ensure the odoo section exists
+  // If the file doesn't exist or is empty, initialize it
+  if (!fileContent) {
+    fileContent = '{}';
+  }
+  
+  // Ensure the odoo section exists and update testTags
+  const edits = [];
   if (!settingsJson.odoo) {
-    settingsJson.odoo = {};
+    edits.push({
+      path: ['odoo'],
+      value: {},
+      formattingOptions: { tabSize: 4, insertSpaces: true }
+    });
   }
   
   // Update the testTags with the method name
-  settingsJson.odoo.testTags = `.${methodName}`;
+  edits.push({
+    path: ['odoo', 'testTags'],
+    value: `.${methodName}`,
+    formattingOptions: { tabSize: 4, insertSpaces: true }
+  });
+  
+  // Apply the edits
+  for (const edit of edits) {
+    const modifications = jsonc.modify(fileContent, edit.path, edit.value, {
+      formattingOptions: edit.formattingOptions
+    });
+    fileContent = jsonc.applyEdits(fileContent, modifications);
+  }
   
   // Write the updated settings back to the file
-  fs.writeFileSync(settingsPath, JSON.stringify(settingsJson, null, 4), 'utf-8');
+  fs.writeFileSync(settingsPath, fileContent, 'utf-8');
   
-  console.log(`Updated settings.json with testTags: ${settingsJson.odoo.testTags}`);
+  console.log(`Updated settings.json with testTags: .${methodName}`);
 }
 
 /**
@@ -164,6 +187,7 @@ async function ensureTestConfigInLaunchJson(): Promise<void> {
     fs.mkdirSync(vscodeDir, { recursive: true });
   }
   
+  let fileContent = '';
   let launchJson: any = {
     version: "0.2.0",
     configurations: []
@@ -172,12 +196,17 @@ async function ensureTestConfigInLaunchJson(): Promise<void> {
   // Read existing launch.json if it exists
   if (fs.existsSync(launchPath)) {
     try {
-      const fileContent = fs.readFileSync(launchPath, 'utf-8');
+      fileContent = fs.readFileSync(launchPath, 'utf-8');
       launchJson = jsonc.parse(fileContent);
     } catch (error) {
       console.error('Error reading launch.json:', error);
       // Continue with default launch.json if there's an error
     }
+  }
+  
+  // If the file doesn't exist or is empty, initialize it
+  if (!fileContent) {
+    fileContent = JSON.stringify(launchJson, null, 4);
   }
   
   // Check if a test configuration already exists
@@ -217,10 +246,12 @@ async function ensureTestConfigInLaunchJson(): Promise<void> {
     }
     
     // Add the new config to the launch configurations
-    launchJson.configurations.push(newTestConfig);
+    const configurations = [...launchJson.configurations, newTestConfig];
+    const modifications = jsonc.modify(fileContent, ['configurations'], configurations, { formattingOptions: { tabSize: 4, insertSpaces: true } });
+    fileContent = jsonc.applyEdits(fileContent, modifications);
     
     // Write the updated launch.json
-    fs.writeFileSync(launchPath, JSON.stringify(launchJson, null, 4), 'utf-8');
+    fs.writeFileSync(launchPath, fileContent, 'utf-8');
     
     console.log(`Added test configuration "${newTestConfig.name}" to launch.json`);
   }
