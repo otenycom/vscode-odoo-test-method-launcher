@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('OdooRunTest extension is now active!');
+  console.log('Odoo Test Method Launcher by Oteny.com extension is now active!');
 
   // Command to run the current test without debugging
   let runDisposable = vscode.commands.registerCommand('oteny-run-odoo-test.runCurrentTest', async () => {
@@ -282,6 +282,15 @@ async function startTest(useDebugger: boolean): Promise<void> {
   
   if (!testConfig) {
     throw new Error('No test configuration found in launch.json');
+  }
+  
+  // Check if there's an active debug session
+  if (vscode.debug.activeDebugSession) {
+    // Only stop the session if it matches our test configuration name
+    if (vscode.debug.activeDebugSession.name === testConfig.name) {
+      console.log(`Stopping existing test session: ${vscode.debug.activeDebugSession.name}`);
+      await vscode.debug.stopDebugging();
+    }
   }
   
   // Start with or without debugging based on parameter
