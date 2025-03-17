@@ -61,6 +61,13 @@ export function activate(context: vscode.ExtensionContext) {
  */
 async function executeTestCommand(useDebugger: boolean): Promise<void> {
   try {
+    // Check if there's an active debug session that's stopped
+    if (vscode.debug.activeDebugSession) {
+      // Continue the current debug session
+      await vscode.commands.executeCommand('workbench.action.debug.continue');
+      return;
+    }
+
     // Get current editor and document
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -326,15 +333,6 @@ async function startTest(useDebugger: boolean): Promise<void> {
   
   if (!testConfig) {
     throw new Error('No test configuration found in launch.json');
-  }
-  
-  // Check if there's an active debug session
-  if (vscode.debug.activeDebugSession) {
-    // Only stop the session if it matches our test configuration name
-    if (vscode.debug.activeDebugSession.name === testConfig.name) {
-      console.log(`Stopping existing test session: ${vscode.debug.activeDebugSession.name}`);
-      await vscode.debug.stopDebugging();
-    }
   }
   
   // Start with or without debugging based on parameter
