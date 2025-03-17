@@ -88,6 +88,13 @@ function getCurrentMethodName(document: vscode.TextDocument, position: vscode.Po
  */
 async function runDefaultConfiguration(useDebugger: boolean): Promise<void> {
   try {
+    // Check if there's an active debug session that's stopped
+    if (vscode.debug.activeDebugSession) {
+      // Continue the current debug session
+      await vscode.commands.executeCommand('workbench.action.debug.continue');
+      return;
+    }
+
     if (useDebugger) {
       // Use the default F5 behavior
       await vscode.commands.executeCommand('workbench.action.debug.start');

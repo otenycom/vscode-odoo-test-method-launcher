@@ -2,7 +2,7 @@
   "name": "oteny-vscode-odoo-test-method-launcher",
   "displayName": "Odoo Test Method Launcher by Oteny.com",
   "description": "Run the current Odoo test method quickly from VSCode",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "publisher": "oteny",
   "engines": {
     "vscode": "^1.60.0"
