@@ -18,3 +18,19 @@ List of notable changes to the "Odoo Test Method Launcher" VSCode extension
 
 - Added logic to stop an existing debug session if it matches the current test configuration before starting a new test session
 - Respect existing whitespace and comments in settings.json and launch.json
+
+## [1.1.0] - 2024-04-XX
+
+### Added
+- New Deploy Commands panel feature to launch deployment operations
+- Tree view for displaying deploy commands from a configurable Python file
+- Support for running and debugging deploy commands
+- Example deploy file with sample OPTIONS dictionary
+
+### Changed
+- Updated README with documentation for the deploy commands feature
+
+## [1.0.7] - 2024-XX-XX
+
+### Fixed
+- Fixed handling of test method detection when cursor is inside a nested function

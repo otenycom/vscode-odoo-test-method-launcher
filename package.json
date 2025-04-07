@@ -25,6 +25,15 @@
       {
         "command": "oteny-run-odoo-test.debugCurrentTest",
         "title": "Oteny: Debug Current Odoo Test Method"
+      },
+      {
+        "command": "oteny-deploy-commands.configureDeployFile",
+        "title": "Oteny: Configure Deploy File"
+      },
+      {
+        "command": "oteny-deploy-commands.refresh",
+        "title": "Oteny: Refresh Deploy Commands",
+        "icon": "$(refresh)"
       }
     ],
     "keybindings": [
@@ -38,6 +47,49 @@
         "key": "ctrl+f5",
         "mac": "ctrl+f5",
         "when": "editorTextFocus && editorLangId == python"
+      }
+    ],
+    "views": {
+      "oteny-views": [
+        {
+          "id": "otenyDeployCommands",
+          "name": "Deploy Commands"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "oteny-views",
+          "title": "Oteny Tools",
+          "icon": "$(wrench)"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "oteny-deploy-commands.refresh",
+          "when": "view == otenyDeployCommands",
+          "group": "navigation"
+        },
+        {
+          "command": "oteny-deploy-commands.configureDeployFile",
+          "when": "view == otenyDeployCommands",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": [
+      {
+        "title": "Oteny Deploy Commands",
+        "properties": {
+          "oteny-deploy-launch": {
+            "type": "string",
+            "default": "",
+            "description": "Path to the deploy Python file containing OPTIONS dictionary"
+          }
+        }
       }
     ]
   },

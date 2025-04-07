@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as jsonc from 'jsonc-parser';
+import { DeployCommandProvider, runDeployCommand } from './deployCommands';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Odoo Test Method Launcher by Oteny.com extension is now active!');
@@ -16,7 +17,43 @@ export function activate(context: vscode.ExtensionContext) {
     await executeTestCommand(true);
   });
 
-  context.subscriptions.push(runDisposable, debugDisposable);
+  // Create the deploy commands provider
+  const deployCommandProvider = new DeployCommandProvider();
+  const deployTreeView = vscode.window.createTreeView('otenyDeployCommands', {
+    treeDataProvider: deployCommandProvider,
+    showCollapseAll: true
+  });
+
+  // Register deploy commands
+  let configureDeployFileDisposable = vscode.commands.registerCommand('oteny-deploy-commands.configureDeployFile', async () => {
+    const result = await vscode.window.showInputBox({
+      prompt: 'Enter the path to the deploy file',
+      placeHolder: 'Path can be absolute or relative to workspace root'
+    });
+    
+    if (result) {
+      await vscode.workspace.getConfiguration().update('oteny-deploy-launch', result, vscode.ConfigurationTarget.Workspace);
+      deployCommandProvider.refresh();
+      vscode.window.showInformationMessage(`Deploy file path set to: ${result}`);
+    }
+  });
+
+  let runCommandDisposable = vscode.commands.registerCommand('oteny-deploy-commands.runCommand', async (commandKey: string, value: string, debug: boolean) => {
+    await runDeployCommand(commandKey, value, debug);
+  });
+
+  let refreshDisposable = vscode.commands.registerCommand('oteny-deploy-commands.refresh', () => {
+    deployCommandProvider.refresh();
+  });
+
+  context.subscriptions.push(
+    runDisposable,
+    debugDisposable,
+    configureDeployFileDisposable,
+    runCommandDisposable,
+    refreshDisposable,
+    deployTreeView
+  );
 }
 
 /**

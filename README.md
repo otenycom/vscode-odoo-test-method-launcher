@@ -9,8 +9,11 @@ Odoo Test Method Launcher is a Visual Studio Code / Cursor extension developed b
 - Updates `.vscode/settings.json` with the correct test method name in the `odoo.testTags` property
 - Creates or updates a test configuration in `.vscode/launch.json` if needed
 - Works with standard Odoo test classes (like `TransactionCase`)
+- Provides a panel to launch deploy commands with configurable options
 
 ## Usage
+
+### Running Tests
 
 1. Open a Python file containing Odoo test methods
 2. Place your cursor within a test method (or on the method definition line)
@@ -22,12 +25,21 @@ Odoo Test Method Launcher is a Visual Studio Code / Cursor extension developed b
    - Ensure a launch configuration named `*-test` exists in `.vscode/launch.json`
    - Lauch Odoo using the "-test" launch configuration. Note that the -test launch configuration is used even if the launch configuration selected in the "Run and Debug" pane is different. This behavior reduces the need for the user to manually switch between launch configurations for testing and regular Odoo startups.
 
+### Deploy Commands
+
+1. Configure the deploy file path in VS Code settings or by clicking "Configure Deploy File" in the Deploy Commands panel
+2. The deploy file should contain an `OPTIONS` dictionary with deployment commands (see example below)
+3. Open the Deploy Commands panel in the Oteny Tools sidebar to see available commands
+4. Click on a command to run or debug it
+
 ## Extension Commands
 
 This extension contributes the following commands:
 
 - `oteny-run-odoo-test.debugCurrentTest`: Debug Current Odoo Test Method (F5)
 - `oteny-run-odoo-test.runCurrentTest`: Run Current Odoo Test Method without Debugging (Ctrl+F5)
+- `oteny-deploy-commands.configureDeployFile`: Configure the path to the deploy file
+- `oteny-deploy-commands.refresh`: Refresh the deploy commands panel
 
 ## How It Works
 
@@ -128,3 +140,38 @@ Oteny.com specializes in Odoo development tools and services. This extension is 
 ## License
 
 [MIT](LICENSE)
+
+## Deploy Commands Configuration
+
+### Deploy File Format
+
+Create a Python file with an `OPTIONS` dictionary that defines your deployment commands:
+
+```python
+OPTIONS = {
+  "excel-to-staging": ["acc", "acc2"],
+  "excel-to-main": ["prod"],
+  "main-to-other": [["main", "acc"], ["main", "acc2"], ["main", "local"]],
+  "staging-to-local": [["acc", "local"], ["acc2", "local"]],
+  "create-reference-db": ["local"],
+  "restore-reference-db": ["local"]
+}
+```
+
+The dictionary keys become command categories, and the values define the targets:
+- Simple strings for single target commands (like `"excel-to-staging": ["acc", "acc2"]`)
+- Arrays for source-target pairs (like `"main-to-other": [["main", "acc"], ["main", "acc2"]]`)
+
+### Example Deploy File
+
+See `example_deploy.py` in the extension repository for a complete example.
+
+### VS Code Settings
+
+Configure the path to your deploy file in settings.json:
+
+```json
+{
+  "oteny-deploy-launch": "path/to/your/deploy_file.py"
+}
+```
